@@ -157,7 +157,7 @@ void blinkLED(int n, int dt) {
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
 typedef void (*SimplePatternList[])();
-SimplePatternList CLOUD_PATTERNS = { rainbow, confetti, white }; //, sinelon, juggle, bpm };
+SimplePatternList CLOUD_PATTERNS = { rainbow, confetti, rainbow_confetti, white }; //, sinelon, juggle, bpm };
 SimplePatternList ROBOT_PATTERNS = { processing, angry };
 
 // for fire pattern
@@ -173,7 +173,7 @@ bool fire_reverse_direction = false;
 int cooling = 80;
 int sparking = 50;
 
-uint8_t max_cloud_cycle_index = 1;
+uint8_t max_cloud_cycle_index = 2;
 uint8_t max_robot_cycle_index = 1;
 uint8_t cloud_pattern_index = 0; // Index number of which pattern is current
 uint8_t robot_pattern_index = 0;
@@ -234,10 +234,13 @@ void BleUartRX(char data[], uint16_t len)
     cycle_cloud_patterns = false;
     cloud_pattern_index = 1;
     ble.waitForOK();
+  } else if (strcmp(data, "rainfetti") == 0) {
+    cycle_cloud_patterns = false;
+    cloud_pattern_index = 2;
   } else if (strcmp(data, "white") == 0) {
     respond("white mode");
     cycle_cloud_patterns = false;
-    cloud_pattern_index = 2;
+    cloud_pattern_index = 3;
     ble.waitForOK();
   } else if (strcmp(data, "sleep") == 0) {
     respond("putting robots to sleep");
@@ -280,7 +283,7 @@ void BleUartRX(char data[], uint16_t len)
     }
     respond("COMMANDS:");
     respond(" b# (set brightness (0-255)) ");
-    respond(" rainbow confetti glitter coma sleep angry lull");
+    respond(" rainbow confetti rainfetti glitter coma sleep angry lull");
     ble.waitForOK();
   }
 }
@@ -380,6 +383,15 @@ void confetti()
   int pos = random16(CLOUD_NUM_LEDS);
   cloud_leds[pos] += CHSV( cloud_rainbow_hue + random8(64), 200, 255);
 }
+
+void rainbow_confetti() 
+{
+  // random colored speckles that blink in and fade smoothly
+  cloud_leds.fadeToBlackBy(40);
+  int pos = random16(CLOUD_NUM_LEDS);
+  cloud_leds[pos] += CHSV( cloud_rainbow_hue, 200, 255);
+}
+
 
 
 #define NUM_A 60
